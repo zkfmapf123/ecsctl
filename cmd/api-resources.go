@@ -12,7 +12,7 @@ var (
 		Long:  "Description ecsctl api-resource",
 		Run: func(cmd *cobra.Command, args []string) {
 
-			t := utils.NewTerminal("")
+			t := utils.NewTerminal("").Clear()
 			shortHandTableWriter(t)
 		},
 	}

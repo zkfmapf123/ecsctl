@@ -3,6 +3,7 @@ package utils
 import (
 	"os"
 	"os/exec"
+	"text/tabwriter"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/olekukonko/tablewriter"
@@ -18,12 +19,12 @@ func NewTerminal(basePath string) Termianl {
 		homeBasePath: basePath,
 	}
 
-	t.Clear()
 	return t
 }
 
-func (t Termianl) Clear() {
+func (t Termianl) Clear() Termianl {
 	cexec("clear")
+	return t
 }
 
 func (t Termianl) SelectOne(title string, items []string) string {
@@ -53,6 +54,7 @@ func (t Termianl) TableWriter(title []string, values [][]string) {
 
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader(title)
+	table.SetAlignment(int(tabwriter.AlignRight))
 
 	for _, value := range values {
 		table.Append(value)

@@ -21,7 +21,7 @@ var (
 		Long:  "ecsctl is interactive CLI for AWS ECS",
 		Run: func(cmd *cobra.Command, args []string) {
 			creds, err := internal.GetCredentialFile()
-			t := utils.NewTerminal("")
+			t := utils.NewTerminal("").Clear()
 			t.Clear()
 
 			if err != nil {
@@ -37,6 +37,7 @@ var (
 
 			t.TableWriter([]string{"Cluster"}, credClusters)
 
+			shortHandTableWriter(t)
 		},
 	}
 )

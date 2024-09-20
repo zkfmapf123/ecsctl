@@ -51,7 +51,7 @@ var (
 		Short: "[Required] setting aws credentials",
 		Long:  "[Required] setting aws credentials",
 		Run: func(cmd *cobra.Command, args []string) {
-			t := utils.NewTerminal(internal.MustGetAWSCredentialsPath(""))
+			t := utils.NewTerminal(internal.MustGetAWSCredentialsPath("")).Clear()
 
 			profiles, err := internal.GetCredentialsFileUseParameter(".aws/credentials")
 			fmt.Println(profiles, err)

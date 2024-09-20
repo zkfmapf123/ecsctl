@@ -16,13 +16,14 @@ var (
 		Long:  "get ecsctl resources",
 		Run: func(cmd *cobra.Command, args []string) {
 
-			t := utils.NewTerminal("")
+			t := utils.NewTerminal("").Clear()
 			awsCreds, err := internal.GetCredentialFile()
 			if err != nil {
 				utils.PanicRed(err)
 			}
 
 			awsConn := internal.NewAWS(awsCreds.Profile, awsCreds.Region)
+			awsConn.SetClusters(awsCreds.Clusters)
 
 			if len(args) == 0 {
 				shortHandTableWriter(t)
@@ -34,12 +35,14 @@ var (
 			// clusters
 			if utils.IncludeString(apiResources.Cluster, command) {
 				utils.MustCheckError(getCluster(awsConn, t))
+				return
 			}
 
-			// // services
-			// if utils.IncludeString(apiResources.Services, command) {
-
-			// }
+			// services
+			if utils.IncludeString(apiResources.Services, command) {
+				utils.MustCheckError(getService(awsConn, t))
+				return
+			}
 
 			// // containers
 			// if utils.IncludeString(apiResources.Containers, command) {
@@ -63,17 +66,24 @@ var (
 )
 
 func getCluster(awsConn internal.AWSParams, t utils.Termianl) error {
-	clusters, err := awsConn.GetECSCluster()
+	headers, values, err := awsConn.GetECSClusterDetails()
 	if err != nil {
 		utils.PanicRed(err)
 	}
 
-	clusterValues := make([][]string, len(clusters))
-	for i, v := range clusters {
-		clusterValues[i] = []string{v}
+	t.TableWriter(headers, values)
+	return nil
+}
+
+func getService(awsConn internal.AWSParams, t utils.Termianl) error {
+
+	headers, values, err := awsConn.GetECSService()
+	if err != nil {
+		utils.PanicRed(err)
 	}
 
-	t.TableWriter([]string{"Cluster Name"}, clusterValues)
+	t.TableWriter(headers, values)
+
 	return nil
 }
 
