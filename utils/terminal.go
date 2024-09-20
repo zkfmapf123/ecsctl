@@ -13,9 +13,13 @@ type Termianl struct {
 }
 
 func NewTerminal(basePath string) Termianl {
-	return Termianl{
+
+	t := Termianl{
 		homeBasePath: basePath,
 	}
+
+	t.Clear()
+	return t
 }
 
 func (t Termianl) Clear() {

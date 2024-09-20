@@ -9,6 +9,7 @@ import (
 )
 
 type AWSParams struct {
+	cluster   []string
 	ecsClient *ecs.Client
 }
 
@@ -25,4 +26,8 @@ func NewAWS(profile string, region string) AWSParams {
 	return AWSParams{
 		ecsClient: ecs.NewFromConfig(cfg),
 	}
+}
+
+func (ap *AWSParams) SetClusters(clusters []string) {
+	ap.cluster = clusters
 }

@@ -21,6 +21,11 @@ func PanicRed(err error) {
 	os.Exit(1)
 }
 
+func WarningYellow(err error) {
+	fmt.Println(color.YellowString("[warning] %s", err.Error()))
+	os.Exit(0)
+}
+
 func NoticeGreen(err error) {
 	fmt.Println(color.GreenString("[notice] %s", err.Error()))
 }

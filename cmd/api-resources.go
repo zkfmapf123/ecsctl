@@ -13,20 +13,24 @@ var (
 		Run: func(cmd *cobra.Command, args []string) {
 
 			t := utils.NewTerminal("")
-
-			values := [][]string{
-				{"api-resources", "api-resources", "Description Resource"},
-				{"clusters", "cl", "ECS Cluster"},
-				{"services", "s", "ECS Service"},
-				{"containers", "c", "Container in ECS Service"},
-				{"tasks", "t", "ECS Task"},
-				{"alb", "al", "ECS ALB Information"},
-			}
-
-			t.TableWriter([]string{"Name", "SHORTHAND", "Description"}, values)
+			shortHandTableWriter(t)
 		},
 	}
 )
+
+func shortHandTableWriter(t utils.Termianl) {
+
+	values := [][]string{
+		{"api-resources", "api-resources", "Description Resource"},
+		{"clusters", "c, clu", "ECS Cluster"},
+		{"services", "s, svc", "ECS Service"},
+		{"containers", "c, con", "Container in ECS Service"},
+		{"tasks", "t, tsk", "ECS Task"},
+		{"alb", "al, alb", "ECS ALB Information"},
+	}
+
+	t.TableWriter([]string{"Name", "SHORTHAND", "Description"}, values)
+}
 
 func init() {
 	rootCmd.AddCommand(apiResourceCmd)
