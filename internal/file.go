@@ -1,29 +1,31 @@
 package internal
 
 import (
+	"bufio"
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/zkfmapf123/dobbyssm/utils"
 	"gopkg.in/yaml.v3"
 )
 
 type AWSCredentials struct {
-	Profile string `yaml:"profile"`
-	Region  string `yaml:"region"`
-	Cluster string `yaml:"cluster"`
+	Profile  string   `yaml:"profile"`
+	Region   string   `yaml:"region"`
+	Clusters []string `yaml:"clusters"`
 }
 
 const PATH = ".aws/ecsns.yaml"
 
-func mustGetAWSCredentialsPath() string {
+func MustGetAWSCredentialsPath(path string) string {
 	dir, err := os.UserHomeDir()
 	if err != nil {
 		utils.PanicRed(err)
 	}
 
-	return filepath.Join(dir, PATH)
+	return filepath.Join(dir, path)
 }
 
 func isExistsFile(filepath string) error {
@@ -39,19 +41,47 @@ func isExistsFile(filepath string) error {
 	return nil
 }
 
+func GetCredentialsFileUseParameter(suffixPath string) ([]string, error) {
+
+	path := MustGetAWSCredentialsPath(suffixPath)
+
+	if err := isExistsFile(path); err != nil {
+		return nil, err
+	}
+
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	var profiles []string
+	sc := bufio.NewScanner(file)
+	for sc.Scan() {
+		line := sc.Text()
+
+		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
+			profiles = append(profiles, strings.Trim(line, "[]"))
+		}
+	}
+
+	return profiles, nil
+}
+
 func GetCredentialFile() (AWSCredentials, error) {
 
-	path := mustGetAWSCredentialsPath()
+	path := MustGetAWSCredentialsPath(PATH)
 
 	if err := isExistsFile(path); err != nil {
 		return AWSCredentials{}, err
 	}
 
 	file, err := os.Open(path)
-	defer file.Close()
 	if err != nil {
 		return AWSCredentials{}, err
 	}
+
+	defer file.Close()
 
 	fb, err := io.ReadAll(file)
 	if err != nil {
@@ -59,6 +89,7 @@ func GetCredentialFile() (AWSCredentials, error) {
 	}
 
 	var creds AWSCredentials
+
 	if err := yaml.Unmarshal(fb, &creds); err != nil {
 		return AWSCredentials{}, err
 	}
@@ -66,13 +97,13 @@ func GetCredentialFile() (AWSCredentials, error) {
 	return creds, nil
 }
 
-func SetCredentialFile(profile string, region string, cluster string) error {
-	path := mustGetAWSCredentialsPath()
+func SetCredentialFile(profile string, region string, clusters []string) error {
+	path := MustGetAWSCredentialsPath(PATH)
 
 	creds := AWSCredentials{
-		Profile: profile,
-		Region:  region,
-		Cluster: cluster,
+		Profile:  profile,
+		Region:   region,
+		Clusters: clusters,
 	}
 
 	yamlBytes, err := yaml.Marshal(creds)

@@ -1,10 +1,10 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"github.com/zkfmapf123/dobbyssm/internal"
 	"github.com/zkfmapf123/dobbyssm/utils"
 )
@@ -20,8 +20,23 @@ var (
 		Short: "ecsctl is interactive CLI for AWS ECS",
 		Long:  "ecsctl is interactive CLI for AWS ECS",
 		Run: func(cmd *cobra.Command, args []string) {
+			creds, err := internal.GetCredentialFile()
+			t := utils.NewTerminal("")
+			t.Clear()
 
-			fmt.Println("hello world")
+			if err != nil {
+				utils.PanicRed(err)
+			}
+
+			fmt.Printf("Profile : %s\nRegion : %s\n", creds.Profile, creds.Region)
+
+			credClusters := make([][]string, len(creds.Clusters))
+			for i, cluster := range creds.Clusters {
+				credClusters[i] = []string{cluster}
+			}
+
+			t.TableWriter([]string{"Cluster"}, credClusters)
+
 		},
 	}
 )
@@ -33,31 +48,31 @@ func MustExecute() {
 }
 
 type AWSCredentials struct {
-	Profile string `json:"profile"`
-	Region  string `json:"region"`
-	Cluster string `json:"cluster"`
+	Profile  string   `json:"profile"`
+	Region   string   `json:"region"`
+	Clusters []string `json:"clusters"`
 }
 
 func initConfig() {
 
-	cred, err := internal.GetCredentialFile()
+	creds, err := internal.GetCredentialFile()
 	if err != nil {
 		utils.NoticeGreen(err)
 
-		// internal.SetCredentialFile()
+		err := internal.SetCredentialFile(
+			_defaultProfile, _defaultRegion, []string{},
+		)
+
+		if err != nil {
+			utils.PanicRed(err)
+		}
 	}
 
-	fmt.Println(cred)
-
+	if creds.Profile == "" || creds.Region == "" {
+		utils.NoticeGreen(errors.New("Please set your aws profile and region"))
+	}
 }
 
 func init() {
 	cobra.OnInitialize(initConfig)
-
-	rootCmd.PersistentFlags().StringP("profile", "p", "", `[optional] your aws profile, default is "default"`)
-	rootCmd.PersistentFlags().StringP("region", "r", "", `[optional] your aws region, default is "region"`)
-	rootCmd.InitDefaultVersionFlag()
-
-	utils.MustCheckError(viper.BindPFlag("profile", rootCmd.PersistentFlags().Lookup("profile")))
-	utils.MustCheckError(viper.BindPFlag("region", rootCmd.PersistentFlags().Lookup("region")))
 }

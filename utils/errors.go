@@ -11,6 +11,11 @@ var (
 	ERR_NOT_EXISTS_FILE = "file not exists"
 )
 
+func SuccessGreen(msg string) {
+	fmt.Println(color.GreenString("[success] %s", msg))
+	os.Exit(0)
+}
+
 func PanicRed(err error) {
 	fmt.Println(color.RedString("[err] %s", err.Error()))
 	os.Exit(1)

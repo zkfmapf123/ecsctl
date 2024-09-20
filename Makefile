@@ -8,11 +8,12 @@ lint:
 	clear
 	golangci-lint run
 
-dev-run: lint
-	go run main.go
-	
 test:
 	go test -v ./...
 
-run: build
-	./bin/main
+_build: clear	
+	go build -o main main.go
+
+dev-run: lint 
+	make _build
+	./main
