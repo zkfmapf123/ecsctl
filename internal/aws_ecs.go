@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"strconv"
+	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/service/ecs"
 )
@@ -72,6 +73,29 @@ func (ap AWSParams) GetECSClusterDetails() ([]string, [][]string, error) {
 	return headers, values, err
 }
 
+func (ap AWSParams) getECSServiceDetails(cluster string) (*ecs.DescribeServicesOutput, error) {
+
+	res, err := ap.ecsClient.ListServices(context.TODO(), &ecs.ListServicesInput{
+		Cluster: &cluster,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	resService, err := ap.ecsClient.DescribeServices(context.TODO(), &ecs.DescribeServicesInput{
+		Cluster:  &cluster,
+		Services: res.ServiceArns,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return resService, nil
+
+}
+
 func (ap AWSParams) GetECSService() ([]string, [][]string, error) {
 
 	if len(ap.cluster) == 0 {
@@ -81,24 +105,13 @@ func (ap AWSParams) GetECSService() ([]string, [][]string, error) {
 	values := [][]string{}
 	for _, cluster := range ap.cluster {
 
-		res, err := ap.ecsClient.ListServices(context.TODO(), &ecs.ListServicesInput{
-			Cluster: &cluster,
-		})
-
-		if err != nil {
-			return nil, nil, err
-		}
-
-		resService, err := ap.ecsClient.DescribeServices(context.TODO(), &ecs.DescribeServicesInput{
-			Cluster:  &cluster,
-			Services: res.ServiceArns,
-		})
-
+		resService, err := ap.getECSServiceDetails(cluster)
 		if err != nil {
 			return nil, nil, err
 		}
 
 		for _, v := range resService.Services {
+
 			values = append(
 				values,
 				[]string{
@@ -108,14 +121,11 @@ func (ap AWSParams) GetECSService() ([]string, [][]string, error) {
 					strconv.Itoa(int(v.PendingCount)),
 					strconv.Itoa(int(v.DesiredCount)),
 					v.CreatedAt.String(),
+					strings.Join(v.NetworkConfiguration.AwsvpcConfiguration.Subnets, " | "),
+					string(v.NetworkConfiguration.AwsvpcConfiguration.AssignPublicIp),
 					strconv.FormatBool(v.EnableExecuteCommand),
 				},
 			)
-
-			// fmt.Println("TaskDefinition : ", v.TaskDefinition)
-			// fmt.Println("Events : ", v.Events)
-			// fmt.Println("NetworkConfiguration : ", v.NetworkConfiguration)
-			// fmt.Println("LoadBalancers : ", v.LoadBalancers)
 		}
 	}
 
@@ -126,6 +136,8 @@ func (ap AWSParams) GetECSService() ([]string, [][]string, error) {
 		"Pending Count",
 		"Desired Count",
 		"Created At",
+		"Network : Subnest",
+		"Network : Assign Public Ip",
 		"exec",
 	}, values, nil
 }
