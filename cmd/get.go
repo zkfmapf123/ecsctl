@@ -44,10 +44,11 @@ var (
 				return
 			}
 
-			// // containers
-			// if utils.IncludeString(apiResources.Containers, command) {
-
-			// }
+			// containers
+			if utils.IncludeString(apiResources.Containers, command) {
+				utils.MustCheckError(getContainer(awsConn, t))
+				return
+			}
 
 			// // tasks
 			// if utils.IncludeString(apiResources.Tasks, command) {
@@ -84,6 +85,17 @@ func getService(awsConn internal.AWSParams, t utils.Termianl) error {
 
 	t.TableWriter(headers, values)
 
+	return nil
+}
+
+func getContainer(awsConn internal.AWSParams, t utils.Termianl) error {
+
+	headers, values, err := awsConn.GetECSContainers()
+	if err != nil {
+		utils.PanicRed(err)
+	}
+
+	t.TableWriter(headers, values)
 	return nil
 }
 

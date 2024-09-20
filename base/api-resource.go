@@ -12,7 +12,7 @@ func GetAPIResources() APIResources {
 	return APIResources{
 		Cluster:    []string{"c", "cluster", "clu"},
 		Services:   []string{"s", "service", "svc"},
-		Containers: []string{"c", "containers", "con"},
+		Containers: []string{"co", "containers", "con"},
 		Tasks:      []string{"t", "tasks", "tsk"},
 		Alb:        []string{"al", "alb"},
 	}

@@ -24,7 +24,7 @@ func shortHandTableWriter(t utils.Termianl) {
 		{"api-resources", "api-resources", "Description Resource"},
 		{"clusters", "c, clu", "ECS Cluster"},
 		{"services", "s, svc", "ECS Service"},
-		{"containers", "c, con", "Container in ECS Service"},
+		{"containers", "co, con", "Container in ECS Service"},
 		{"tasks", "t, tsk", "ECS Task"},
 		{"alb", "al, alb", "ECS ALB Information"},
 	}
