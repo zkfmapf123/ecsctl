@@ -204,10 +204,10 @@ func (ap AWSParams) GetECSContainers() ([]string, [][]string, error) {
 
 				for _, container := range t.Containers {
 
-					image := ""
-					if container.Image != nil {
-						image = *container.Image
-					}
+					// image := ""
+					// if container.Image != nil {
+					// 	image = *container.Image
+					// }
 
 					values = append(
 						values,
@@ -215,7 +215,7 @@ func (ap AWSParams) GetECSContainers() ([]string, [][]string, error) {
 							clusterName,
 							containerArn[len(containerArn)-1],
 							*container.Name,
-							image,
+							// image,
 							*container.LastStatus,
 							t.StartedAt.String(),
 							*t.Cpu,
@@ -233,7 +233,7 @@ func (ap AWSParams) GetECSContainers() ([]string, [][]string, error) {
 		"Cluster Name",
 		"Task Id",
 		"Container Name",
-		"Image",
+		// "Image",
 		"Status",
 		"Task Started At",
 		"CPU",
