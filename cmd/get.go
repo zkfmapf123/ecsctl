@@ -16,7 +16,7 @@ var (
 		Long:  "get ecsctl resources",
 		Run: func(cmd *cobra.Command, args []string) {
 
-			t := utils.NewTerminal("").Clear()
+			t := utils.NewTerminal("")
 			awsCreds, err := internal.GetCredentialFile()
 			if err != nil {
 				utils.PanicRed(err)
@@ -50,12 +50,7 @@ var (
 				return
 			}
 
-			// // tasks
-			// if utils.IncludeString(apiResources.Tasks, command) {
-
-			// }
-
-			// // alb
+			// alb
 			// if utils.IncludeString(apiResources.Alb, command) {
 
 			// }
