@@ -1,6 +1,10 @@
 # ecsctl
 
-## diff kubernetes Object
+## Description & Use
+
+- ...
+
+## Diff kubernetes Object
 
 | eksctl | ecsctl | command |
 |----------|----------|----------|
@@ -15,4 +19,11 @@
 - api-resources
 - get
 - exec
+
+## Update History
+
+| Todo | UpdatedAt | Version |
+|----------|----------|----------|
+|  Add command : api-resources  |  2024.9.20 | none |
+|  Add command : get  |  2024.9.20  |   none |
 
