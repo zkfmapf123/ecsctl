@@ -26,4 +26,5 @@
 |----------|----------|----------|
 |  Add command : api-resources  |  2024.9.20 | none |
 |  Add command : get  |  2024.9.20  |   none |
+|  Add command : exec  |  2024.9.21  |   none |
 

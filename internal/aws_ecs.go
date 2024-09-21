@@ -204,11 +204,6 @@ func (ap AWSParams) GetECSContainers() ([]string, [][]string, error) {
 
 				for _, container := range t.Containers {
 
-					// image := ""
-					// if container.Image != nil {
-					// 	image = *container.Image
-					// }
-
 					values = append(
 						values,
 						[]string{
@@ -221,6 +216,7 @@ func (ap AWSParams) GetECSContainers() ([]string, [][]string, error) {
 							*t.Cpu,
 							*t.Memory,
 							string(t.LaunchType),
+							strconv.FormatBool(t.EnableExecuteCommand),
 						},
 					)
 
@@ -239,5 +235,6 @@ func (ap AWSParams) GetECSContainers() ([]string, [][]string, error) {
 		"CPU",
 		"Memory",
 		"Launch Type",
+		"Exec",
 	}, values, nil
 }
