@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/service/ecs"
+	"github.com/zkfmapf123/dobbyssm/utils"
 )
 
 func (ap AWSParams) GetECSCluster() ([]string, error) {
@@ -89,6 +90,12 @@ func (ap AWSParams) getECSServiceDetails(cluster string) (*ecs.DescribeServicesO
 	})
 
 	if err != nil {
+
+		// Empty Service
+		if strings.Contains(err.Error(), utils.EXCEPTION_EMPTY_SERVICE) {
+			return nil, errors.New(utils.EXCEPTION_EMPTY_SERVICE)
+		}
+
 		return nil, err
 	}
 
@@ -119,7 +126,13 @@ func (ap AWSParams) GetECSService() ([]string, [][]string, error) {
 	for _, cluster := range ap.cluster {
 
 		resService, err := ap.getECSServiceDetails(cluster)
+
 		if err != nil {
+
+			if strings.Contains(err.Error(), utils.EXCEPTION_EMPTY_SERVICE) {
+				continue
+			}
+
 			return nil, nil, err
 		}
 
@@ -172,6 +185,11 @@ func (ap AWSParams) GetECSContainers() ([]string, [][]string, error) {
 		// serivce
 		serviceRes, err := ap.getECSServiceDetails(cluster)
 		if err != nil {
+
+			if strings.Contains(err.Error(), utils.EXCEPTION_EMPTY_SERVICE) {
+				continue
+			}
+
 			return nil, nil, err
 		}
 

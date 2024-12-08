@@ -2,7 +2,7 @@ clear:
 	rm -rf ./bin/*
 
 build: clear
-	go build -o bin/main main.go
+	go build -o bin/ecsctl main.go
 
 lint:
 	clear
@@ -12,7 +12,7 @@ test:
 	go test -v ./...
 
 _build: clear	
-	go build -o main main.go
+	go build -o ecsctl main.go
 
 dev-run: lint 
 	make _build

@@ -29,5 +29,15 @@ func NewAWS(profile string, region string) AWSParams {
 }
 
 func (ap *AWSParams) SetClusters(clusters []string) {
-	ap.cluster = clusters
+
+	if len(clusters) == 0 {
+		cs, err := ap.GetECSCluster()
+		if err != nil {
+			utils.PanicRed(err)
+		}
+
+		ap.cluster = cs
+	} else {
+		ap.cluster = clusters
+	}
 }

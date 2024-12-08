@@ -61,7 +61,9 @@ var (
 
 			// 1. select task
 			_, ecsContainers, err := awsConn.GetECSContainers()
+
 			if err != nil {
+
 				utils.PanicRed(err)
 			}
 

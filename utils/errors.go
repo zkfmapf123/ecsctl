@@ -11,6 +11,10 @@ var (
 	ERR_NOT_EXISTS_FILE = "file not exists"
 )
 
+var (
+	EXCEPTION_EMPTY_SERVICE = "Services cannot be empty"
+)
+
 func SuccessGreen(msg string) {
 	fmt.Println(color.GreenString("[success] %s", msg))
 	os.Exit(0)
