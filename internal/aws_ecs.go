@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/service/ecs"
+	"github.com/aws/aws-sdk-go-v2/service/ecs/types"
 	"github.com/zkfmapf123/dobbyssm/utils"
 )
 
@@ -74,32 +75,59 @@ func (ap AWSParams) GetECSClusterDetails() ([]string, [][]string, error) {
 	return headers, values, err
 }
 
-func (ap AWSParams) getECSServiceDetails(cluster string) (*ecs.DescribeServicesOutput, error) {
+func (ap AWSParams) getECSServiceDetails(cluster string) ([]types.Service, error) {
 
-	res, err := ap.ecsClient.ListServices(context.TODO(), &ecs.ListServicesInput{
-		Cluster: &cluster,
-	})
+	var serviceArns []string
+	var nextToken *string
 
-	if err != nil {
-		return nil, err
-	}
+	for {
+		res, err := ap.ecsClient.ListServices(context.TODO(), &ecs.ListServicesInput{
+			Cluster:   &cluster,
+			NextToken: nextToken,
+		})
 
-	resService, err := ap.ecsClient.DescribeServices(context.TODO(), &ecs.DescribeServicesInput{
-		Cluster:  &cluster,
-		Services: res.ServiceArns,
-	})
-
-	if err != nil {
-
-		// Empty Service
-		if strings.Contains(err.Error(), utils.EXCEPTION_EMPTY_SERVICE) {
-			return nil, errors.New(utils.EXCEPTION_EMPTY_SERVICE)
+		if err != nil {
+			return nil, err
 		}
 
-		return nil, err
+		serviceArns = append(serviceArns, res.ServiceArns...)
+		if res.NextToken == nil {
+			break
+		}
+
+		if res.NextToken == nil {
+			break
+		}
+
+		nextToken = res.NextToken
 	}
 
-	return resService, nil
+	resServiceOutput := []types.Service{}
+
+	for i := 0; i < len(serviceArns); i += 10 {
+		end := i + 10
+		if end > len(serviceArns) {
+			end = len(serviceArns)
+		}
+
+		resService, err := ap.ecsClient.DescribeServices(context.TODO(), &ecs.DescribeServicesInput{
+			Cluster:  &cluster,
+			Services: serviceArns[i:end],
+		})
+
+		if err != nil {
+			if strings.Contains(err.Error(), utils.EXCEPTION_EMPTY_SERVICE) {
+				return nil, errors.New(utils.EXCEPTION_EMPTY_SERVICE)
+			}
+
+			return nil, err
+
+		}
+
+		resServiceOutput = append(resServiceOutput, resService.Services...)
+	}
+
+	return resServiceOutput, nil
 }
 
 func (ap AWSParams) getECSTasks(cluster, serviceName string) ([]string, error) {
@@ -136,7 +164,7 @@ func (ap AWSParams) GetECSService() ([]string, [][]string, error) {
 			return nil, nil, err
 		}
 
-		for _, v := range resService.Services {
+		for _, v := range resService {
 
 			revision := *v.TaskDefinition
 			revisionArr := strings.Split(revision, "/")
@@ -194,7 +222,7 @@ func (ap AWSParams) GetECSContainers() ([]string, [][]string, error) {
 		}
 
 		// Task
-		for _, svc := range serviceRes.Services {
+		for _, svc := range serviceRes {
 
 			taskRes, err := ap.getECSTasks(cluster, *svc.ServiceName)
 			if err != nil {
