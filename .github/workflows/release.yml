@@ -92,22 +92,19 @@ jobs:
           asset_name: ecsctl-windows-amd64.exe
           asset_content_type: application/x-msdownload
 
-      - name: Calculate and Upload SHA-256 Checksums
+      - name: Calculate and Display SHA-256 for Homebrew
         run: |
-          for file in ecsctl-*; do
-            shasum -a 256 "$file" | awk '{ print $1 }' > "$file.sha256"
-            echo "SHA-256 for $file: $(cat $file.sha256)"
-          done
-
-      - name: Upload SHA-256 Checksums
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./ecsctl-*.sha256
-          asset_name: checksums.sha256
-          asset_content_type: text/plain
+          echo "SHA-256 for Homebrew Formula:"
+          echo "Darwin AMD64:"
+          shasum -a 256 ecsctl-darwin-amd64 | awk '{ print $1 }'
+          echo "Darwin ARM64:"
+          shasum -a 256 ecsctl-darwin-arm64 | awk '{ print $1 }'
+          echo "Linux AMD64:"
+          shasum -a 256 ecsctl-linux-amd64 | awk '{ print $1 }'
+          echo "Linux ARM64:"
+          shasum -a 256 ecsctl-linux-arm64 | awk '{ print $1 }'
+          echo "Windows AMD64:"
+          shasum -a 256 ecsctl-windows-amd64.exe | awk '{ print $1 }'
 
       - name: Display Release URL
         run: |
