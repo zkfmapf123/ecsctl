@@ -16,11 +16,15 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
-          go-version: "1.23" # 원하는 Go 버전으로 변경하세요.
+          go-version: "1.21"
 
-      - name: Build Go project
+      - name: Build for multiple platforms
         run: |
-          GOOS=darwin GOARCH=amd64 go build -o ecsctl
+          GOOS=darwin GOARCH=amd64 go build -o ecsctl-darwin-amd64
+          GOOS=darwin GOARCH=arm64 go build -o ecsctl-darwin-arm64
+          GOOS=linux GOARCH=amd64 go build -o ecsctl-linux-amd64
+          GOOS=linux GOARCH=arm64 go build -o ecsctl-linux-arm64
+          GOOS=windows GOARCH=amd64 go build -o ecsctl-windows-amd64.exe
 
       - name: Extract Tag Name
         id: extract_tag
@@ -38,21 +42,73 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Upload Release Asset
+      - name: Upload Release Assets
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./ecsctl
-          asset_name: ecsctl
+          asset_path: ./ecsctl-darwin-amd64
+          asset_name: ecsctl-darwin-amd64
+          asset_content_type: application/octet-stream
+
+      - name: Upload Release Assets - Darwin ARM64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./ecsctl-darwin-arm64
+          asset_name: ecsctl-darwin-arm64
+          asset_content_type: application/octet-stream
+
+      - name: Upload Release Assets - Linux AMD64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./ecsctl-linux-amd64
+          asset_name: ecsctl-linux-amd64
+          asset_content_type: application/octet-stream
+
+      - name: Upload Release Assets - Linux ARM64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./ecsctl-linux-arm64
+          asset_name: ecsctl-linux-arm64
+          asset_content_type: application/octet-stream
+
+      - name: Upload Release Assets - Windows AMD64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./ecsctl-windows-amd64.exe
+          asset_name: ecsctl-windows-amd64.exe
           asset_content_type: application/x-msdownload
+
+      - name: Calculate and Upload SHA-256 Checksums
+        run: |
+          for file in ecsctl-*; do
+            shasum -a 256 "$file" | awk '{ print $1 }' > "$file.sha256"
+            echo "SHA-256 for $file: $(cat $file.sha256)"
+          done
+
+      - name: Upload SHA-256 Checksums
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./ecsctl-*.sha256
+          asset_name: checksums.sha256
+          asset_content_type: text/plain
 
       - name: Display Release URL
         run: |
           echo "Release URL: ${{ steps.create_release.outputs.html_url }}"
-
-      - name: Calculate SHA-256 Checksum
-        run: |
-          SHA256=$(shasum -a 256 wip | awk '{ print $1 }')
-          echo "SHA-256: $SHA256"
