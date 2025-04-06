@@ -25,6 +25,10 @@
 | svc           | alb           | al            | X              |
 | exec          | exec          | exec          | O              |
 
+## implementation
+
+- ecsns (configuration profile, cluster, svc)
+
 ## Update History
 
 | Todo                        | UpdatedAt | Version |
